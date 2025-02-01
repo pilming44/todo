@@ -9,13 +9,13 @@ import todoapp.core.todo.domain.Todo;
  *
  * @author springrunner.kr@gmail.com
  */
-public class SpreadsheetConverter {
+public class TodoSpreadsheetConverter {
 
     public static Spreadsheet convert(Iterable<Todo> todos) {
         var header = Spreadsheet.Row.of("id", "text", "completed");
 
         var todoStream = StreamUtils.createStreamFromIterator(todos.iterator());
-        var rows = todoStream.map(SpreadsheetConverter::mapRow).toList();
+        var rows = todoStream.map(TodoSpreadsheetConverter::mapRow).toList();
 
         return new Spreadsheet("todos", header, rows);
     }
@@ -24,12 +24,12 @@ public class SpreadsheetConverter {
         return Spreadsheet.Row.of(
                 todo.getId(),
                 todo.getText(),
-                todo.isCompleted() ? "완료" : "미완료"
+                todo.isCompleted() ? "Completed" : "To Do"
         );
     }
 
     // 외부에서 생성을 막기 위해 비공개 기본 생성자를 선언했다
-    private SpreadsheetConverter() {
+    private TodoSpreadsheetConverter() {
 
     }
 
