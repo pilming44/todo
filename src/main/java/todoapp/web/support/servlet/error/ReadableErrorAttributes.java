@@ -8,12 +8,15 @@ import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.core.Ordered;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -35,13 +38,19 @@ public class ReadableErrorAttributes implements ErrorAttributes, HandlerExceptio
     public Map<String, Object> getErrorAttributes(WebRequest webRequest, ErrorAttributeOptions options) {
         var attributes = delegate.getErrorAttributes(webRequest, options);
         var error = getError(webRequest);
+        Locale locale = webRequest.getLocale();
 
         log.debug("obtain error-attributes: {}", attributes, error);
 
-        if (Objects.nonNull(error)) {
-            var errorCode = "Exception.%s".formatted(error.getClass().getSimpleName());
-            var errorMessage = messageSource.getMessage(errorCode, new Object[0], error.getMessage(), webRequest.getLocale());
-            attributes.put("message", errorMessage);
+        String errorMessage = resolveErrorMessage(error, locale);
+        attributes.put("message", errorMessage);
+
+        BindingResult bindingResult = extractBindingResult(error);
+        if (Objects.nonNull(bindingResult)) {
+            List<String> errors = bindingResult.getAllErrors().stream()
+                    .map(it -> messageSource.getMessage(it, locale))
+                    .toList();
+            attributes.put("errors", errors);
         }
 
         return attributes;
@@ -71,6 +80,14 @@ public class ReadableErrorAttributes implements ErrorAttributes, HandlerExceptio
             return bindingResult;
         }
         return null;
+    }
+
+    private String resolveErrorMessage(Throwable error, Locale locale) {
+        if (error instanceof MessageSourceResolvable resolvable) {
+            return messageSource.getMessage(resolvable, locale);
+        }
+        var errorCode = "Exception.%s".formatted(error.getClass().getSimpleName());
+        return messageSource.getMessage(errorCode, new Object[0], error.getMessage(), locale);
     }
 
 }
