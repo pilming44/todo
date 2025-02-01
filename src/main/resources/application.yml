@@ -14,3 +14,7 @@ server:
   error:
     include-binding-errors: always
     include-message: always
+
+feature-toggles:
+  auth: true
+  onlineUsersCounter: false
