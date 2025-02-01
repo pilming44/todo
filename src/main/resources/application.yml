@@ -5,3 +5,7 @@ spring:
 logging:
   level:
     web: debug
+
+site:
+  author: pilming44
+  description: TodoApp templates for Server-side
