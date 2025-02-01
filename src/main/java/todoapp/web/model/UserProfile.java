@@ -11,7 +11,7 @@ import java.util.Objects;
  */
 public class UserProfile {
 
-    private static final String DEFAULT_PROFILE_PICTURE_URL = "/profile-picture.png";
+    private static final String DEFAULT_PROFILE_PICTURE_URL = "/static/profile-picture.png";
     private static final String USER_PROFILE_PICTURE_URL = "/user/profile-picture";
 
     private final User user;
