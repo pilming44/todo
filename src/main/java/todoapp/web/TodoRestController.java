@@ -1,5 +1,8 @@
 package todoapp.web;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -30,13 +33,13 @@ public class TodoRestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void add(@RequestBody TodoRecord todoRecord) {
+    public void add(@RequestBody @Valid TodoRecord todoRecord) {
         log.debug("todoRecord.text >>>>>>>>>>>>>>> {}", todoRecord.text);
         addTodo.add(todoRecord.text);
     }
 
     @PutMapping("/{id}")
-    public void modify(@PathVariable("id") String id, @RequestBody TodoRecord todoRecord) {
+    public void modify(@PathVariable("id") String id, @RequestBody @Valid TodoRecord todoRecord) {
         log.debug("id >>>>>>>>>>>>>>> {}", id);
         log.debug("todoRecord >>>>>>>>>>>>>>> text : {}, completed : {}", todoRecord.text, todoRecord.completed);
         modifyTodo.modify(TodoId.of(id), todoRecord.text, todoRecord.completed);
@@ -48,6 +51,10 @@ public class TodoRestController {
         removeTodo.remove(TodoId.of(id));
     }
 
-    public record TodoRecord(String text, boolean completed) {
+    public record TodoRecord(@NotBlank @Size(min = 4, max = 50) String text, boolean completed) {
+        public TodoRecord(String text, boolean completed) {
+            this.text = text.trim();
+            this.completed = completed;
+        }
     }
 }
